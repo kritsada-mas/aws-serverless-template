@@ -1,4 +1,7 @@
+# SAM build files
 .aws-sam
 samconfig.toml
 **/**/packaged.yaml
+
+# vscode setting files
 .vscode/
