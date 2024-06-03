@@ -1,0 +1,43 @@
+# main.yaml
+
+AWSTemplateFormatVersion: 2010-09-09
+Transform: AWS::Serverless-2016-10-31
+Description: >
+  This template defines the resources for the API Gateway infrastructure.
+
+Parameters:
+  Environment:
+    Type: String
+    Default: dev
+    AllowedValues:
+      - dev
+      - prod
+    Description: The environment to deploy the resources to
+  ProjectName:
+    Type: String
+    Description: The name of the project
+    Default: km-test
+
+Resources:
+  LambdaFunction:
+    Type: AWS::Serverless::Application
+    Properties:
+      Location: ./lambda.yaml
+      Parameters:
+        Environment: !Ref Environment
+        ProjectName: !Ref ProjectName
+
+  API:
+    Type: AWS::Serverless::Application
+    Properties:
+      Location: ./api.yaml
+      Parameters:
+        Environment: !Ref Environment
+        ProjectName: !Ref ProjectName
+        POSTHandlerFunctionArn: !GetAtt LambdaFunction.Outputs.POSTHandlerFunctionArn
+        GETHandlerFunctionArn: !GetAtt LambdaFunction.Outputs.GETHandlerFunctionArn
+
+Outputs:
+  API:
+    Description: The API Gateway endpoint.
+    Value: !GetAtt API.Outputs.EndpointURL

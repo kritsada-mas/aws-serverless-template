@@ -1,0 +1,42 @@
+AWSTemplateFormatVersion: 2010-09-09
+Transform: AWS::Serverless-2016-10-31
+
+Parameters:
+  Environment:
+    Type: String
+  ProjectName:
+    Type: String
+
+Globals:
+  Function:
+    Timeout: 30
+    MemorySize: 128
+    Runtime: python3.11
+
+Resources:
+  POSTHandlerFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub ${ProjectName}-${Environment}-POSTHandler
+      Handler: post.lambda_handler
+      CodeUri: ../resources/lambda
+      Role: !Sub arn:aws:iam::${AWS::AccountId}:role/LambdaBasicExecution
+
+  GETHandlerFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub ${ProjectName}-${Environment}-GETHandler
+      Handler: get.lambda_handler
+      CodeUri: ../resources/lambda
+      Role: !Sub arn:aws:iam::${AWS::AccountId}:role/LambdaBasicExecution
+
+Outputs:
+  POSTHandlerFunctionArn:
+    Description: The POST handler function.
+    Value: !GetAtt POSTHandlerFunction.Arn
+
+  GETHandlerFunctionArn:
+    Description: The GET handler function.
+    Value: !GetAtt GETHandlerFunction.Arn
+
+      

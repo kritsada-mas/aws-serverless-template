@@ -1,0 +1,32 @@
+# api.yaml
+
+AWSTemplateFormatVersion: 2010-09-09
+Transform: AWS::Serverless-2016-10-31
+
+Parameters:
+  Environment:
+    Type: String
+  ProjectName:
+    Type: String
+  POSTHandlerFunctionArn:
+    Type: String
+  GETHandlerFunctionArn:
+    Type: String
+    
+Resources:
+  API:
+    Type: AWS::Serverless::Api
+    Properties:
+      StageName: !Ref Environment
+      EndpointConfiguration:
+          Type: REGIONAL
+      DefinitionBody:
+        Fn::Transform:
+          Name: AWS::Include
+          Parameters:
+            Location: ../resources/api/openapi.yaml
+
+Outputs:
+  EndpointURL:
+    Description: The API Gateway endpoint.
+    Value: !Sub "https://${API}.execute-api.${AWS::Region}.amazonaws.com/${Environment}/"

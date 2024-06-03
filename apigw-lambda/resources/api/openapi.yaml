@@ -1,0 +1,154 @@
+openapi: "3.0.1"
+info:
+  title: ${ProjectName}-${Environment}-API
+  description: ${ProjectName}-${Environment}-API
+  version: "0.0.1"
+
+paths:
+  /example-post:
+    post:
+      responses:
+        '200':
+          description: "200 response"
+          headers:
+            Access-Control-Allow-Origin:
+              schema:
+                type: "string"
+          content: {}
+      x-amazon-apigateway-integration:
+        httpMethod: "POST"
+        uri: {"Fn::Sub":"arn:aws:apigateway:us-west-2:lambda:path/2015-03-31/functions/${POSTHandlerFunctionArn}/invocations"}
+        responses:
+          default:
+            statusCode: "200"
+            responseParameters:
+              method.response.header.Access-Control-Allow-Origin: "'*'"
+            responseTemplates:
+              application/json: |
+                $input.json('$')
+                #set($context.responseOverride.status = $input.path('$.statusCode'))
+        requestParameters:
+          integration.request.header.Accept: "'*/*'"
+          integration.request.header.Content-Type: "'method.request.header.Content-Type'"
+        requestTemplates:
+          multipart/form-data: |
+            #set($allParams = $input.params())
+            {
+              "body-json" : $input.json('$'),
+              "params" : {
+                #foreach($type in $allParams.keySet())
+                #set($params = $allParams.get($type))
+                "$type" : {
+                  #foreach($paramName in $params.keySet())
+                  "$paramName" : "$util.escapeJavaScript($params.get($paramName))"
+                  #if($foreach.hasNext),#end
+                  #end
+                }
+                #if($foreach.hasNext),#end
+                #end
+              }
+            }
+        passthroughBehavior: "when_no_templates"
+        contentHandling: "CONVERT_TO_TEXT"
+        type: "aws"
+    options:
+      responses:
+        '200':
+          description: "200 response"
+          headers:
+            Access-Control-Allow-Origin:
+              schema:
+                type: "string"
+            Access-Control-Allow-Methods:
+              schema:
+                type: "string"
+            Access-Control-Allow-Headers:
+              schema:
+                type: "string"
+          content: {}
+      x-amazon-apigateway-integration:
+        responses:
+          default:
+            statusCode: "200"
+            responseParameters:
+              method.response.header.Access-Control-Allow-Methods: "'OPTIONS,POST'"
+              method.response.header.Access-Control-Allow-Headers: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token,X-Amz-User-Agent'"
+              method.response.header.Access-Control-Allow-Origin: "'*'"
+        requestTemplates:
+          application/json: "{ statusCode: 200 }"
+        passthroughBehavior: "when_no_match"
+        type: "mock"
+  /example-get:
+    get:
+      responses:
+        '200':
+          description: "200 response"
+          headers:
+            Access-Control-Allow-Origin:
+              schema:
+                type: "string"
+          content: {}
+      x-amazon-apigateway-integration:
+        httpMethod: "POST"
+        uri: {"Fn::Sub":"arn:aws:apigateway:us-west-2:lambda:path/2015-03-31/functions/${GETHandlerFunctionArn}/invocations"}
+        responses:
+          default:
+            statusCode: "200"
+            responseParameters:
+              method.response.header.Access-Control-Allow-Origin: "'*'"
+            responseTemplates:
+              application/json: |
+                $input.json('$')
+                #set($context.responseOverride.status = $input.path('$.statusCode'))
+        requestParameters:
+          integration.request.header.Accept: "'*/*'"
+          integration.request.header.Content-Type: "'method.request.header.Content-Type'"
+        requestTemplates:
+          application/json: |
+            #set($allParams = $input.params())
+            {
+              "body-json" : $input.json('$'),
+              "params" : {
+                #foreach($type in $allParams.keySet())
+                #set($params = $allParams.get($type))
+                "$type" : {
+                  #foreach($paramName in $params.keySet())
+                  "$paramName" : "$util.escapeJavaScript($params.get($paramName))"
+                  #if($foreach.hasNext),#end
+                  #end
+                }
+                #if($foreach.hasNext),#end
+                #end
+              }
+            }
+        passthroughBehavior: "when_no_templates"
+        contentHandling: "CONVERT_TO_TEXT"
+        type: "aws"
+    options:
+      responses:
+        '200':
+          description: "200 response"
+          headers:
+            Access-Control-Allow-Origin:
+              schema:
+                type: "string"
+            Access-Control-Allow-Methods:
+              schema:
+                type: "string"
+            Access-Control-Allow-Headers:
+              schema:
+                type: "string"
+          content: {}
+      x-amazon-apigateway-integration:
+        responses:
+          default:
+            statusCode: "200"
+            responseParameters:
+              method.response.header.Access-Control-Allow-Methods: "'OPTIONS,GET'"
+              method.response.header.Access-Control-Allow-Headers: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token,X-Amz-User-Agent'"
+              method.response.header.Access-Control-Allow-Origin: "'*'"
+        requestTemplates:
+          application/json: "{ statusCode: 200 }"
+        passthroughBehavior: "when_no_match"
+        type: "mock"
+
