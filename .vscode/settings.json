@@ -1,6 +1,0 @@
-{
-    "conventionalCommits.scopes": [
-        "apigw-lambda",
-        "apigw-lambda-with-cognito"
-    ]
-}
