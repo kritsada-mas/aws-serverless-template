@@ -3,10 +3,24 @@ info:
   title: ${ProjectName}-${Environment}-API
   description: ${ProjectName}-${Environment}-API
   version: "0.0.1"
+  
+components:
+  securitySchemes:
+    CognitoAuthorizer:
+      type: apiKey
+      name: Authorization
+      in: header
+      x-amazon-apigateway-authtype: cognito_user_pools
+      x-amazon-apigateway-authorizer:
+        type: cognito_user_pools
+        providerARNs:
+          - ${UserPoolArn}
 
 paths:
   /example-post:
     post:
+      security:
+        - CognitoAuthorizer: []
       responses:
         '200':
           description: "200 response"
@@ -80,6 +94,8 @@ paths:
         type: "mock"
   /example-get:
     get:
+      security:
+        - CognitoAuthorizer: []
       responses:
         '200':
           description: "200 response"
@@ -151,4 +167,3 @@ paths:
           application/json: "{ statusCode: 200 }"
         passthroughBehavior: "when_no_match"
         type: "mock"
-

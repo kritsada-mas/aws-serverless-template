@@ -17,6 +17,9 @@ Parameters:
     Type: String
     Description: The name of the project
     Default: km-test
+  UserPoolArn:
+    Type: String
+    Description: The ARN of the Cognito User Pool
 
 Resources:
   LambdaFunction:
@@ -36,6 +39,7 @@ Resources:
         ProjectName: !Ref ProjectName
         POSTHandlerFunctionArn: !GetAtt LambdaFunction.Outputs.POSTHandlerFunctionArn
         GETHandlerFunctionArn: !GetAtt LambdaFunction.Outputs.GETHandlerFunctionArn
+        UserPoolArn: !Ref UserPoolArn
 
 Outputs:
   API:

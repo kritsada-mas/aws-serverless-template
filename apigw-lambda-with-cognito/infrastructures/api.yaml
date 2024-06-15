@@ -12,19 +12,36 @@ Parameters:
     Type: String
   GETHandlerFunctionArn:
     Type: String
+  UserPoolArn:
+    Type: String
     
 Resources:
+  # CognitoAuthorizer:
+  #   Type: AWS::ApiGateway::Authorizer
+  #   Properties:
+  #     Name: CognitoAuthorizer
+  #     Type: COGNITO_USER_POOLS
+  #     RestApiId: !Ref ApiID
+  #     IdentitySource: method.request.header.Authorization
+  #     ProviderARNs:
+  #       - !Ref UserPoolArn
+
   API:
     Type: AWS::Serverless::Api
     Properties:
       StageName: !Ref Environment
       EndpointConfiguration:
           Type: REGIONAL
+      # Auth:
+      #   DefaultAuthorizer: CognitoAuthorizer
+      #   Authorizers:
+      #     CognitoAuthorizer:
+      #       UserPoolArn: !Ref UserPoolArn
       DefinitionBody:
         Fn::Transform:
           Name: AWS::Include
           Parameters:
-            Location: ../resources/api/openapi.yaml
+            Location: ../resources/api/openapi-generated.yaml
 
 Outputs:
   EndpointURL:

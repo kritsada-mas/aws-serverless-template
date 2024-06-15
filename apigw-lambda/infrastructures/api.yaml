@@ -24,7 +24,7 @@ Resources:
         Fn::Transform:
           Name: AWS::Include
           Parameters:
-            Location: ../resources/api/openapi.yaml
+            Location: ../resources/api/openapi-generated.yaml
 
 Outputs:
   EndpointURL:
