@@ -1,0 +1,63 @@
+AWSTemplateFormatVersion: 2010-09-09
+Transform: AWS::Serverless-2016-10-31
+
+Parameters:
+  Environment:
+    Type: String
+  ProjectName:
+    Type: String
+  S3BUCKET:
+    Type: String
+
+Globals:
+  Function:
+    Timeout: 60
+    MemorySize: 4048
+    EphemeralStorage:
+      Size: 1024
+    Runtime: python3.11
+    
+
+Resources:
+  InternetSearchFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub ${ProjectName}-${Environment}-InternetSearch
+      Handler: lambda_internet_search.lambda_handler
+      CodeUri: ../resources/lambda
+      Role: !Sub arn:aws:iam::${AWS::AccountId}:role/LambdaBasicExecution
+      Layers:
+        - !Ref BedrockWebscraperAgentLayer
+      
+
+  WebscraperFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub ${ProjectName}-${Environment}-Webscraper
+      Handler: lambda_webscraper.lambda_handler
+      CodeUri: ../resources/lambda
+      Role: !Sub arn:aws:iam::${AWS::AccountId}:role/LambdaBasicExecution
+      Layers:
+        - !Ref BedrockWebscraperAgentLayer
+
+  BedrockWebscraperAgentLayer:
+    Type: AWS::Lambda::LayerVersion
+    Properties:
+      LayerName: BedrockWebscraperAgentLayer
+      Description: Layer containing requests, googlesearch, beatifulsoup library
+      Content:
+        S3Bucket: !Ref S3BUCKET
+        S3Key: !Sub layers/layer-python-requests-googlesearch-beatifulsoup.zip
+      CompatibleRuntimes:
+        - python3.11
+
+Outputs:
+  InternetSearchFunctionArn:
+    Description: internet search function.
+    Value: !GetAtt InternetSearchFunction.Arn
+
+  WebscraperFunctionArn:
+    Description: webscraper function.
+    Value: !GetAtt WebscraperFunction.Arn
+
+      

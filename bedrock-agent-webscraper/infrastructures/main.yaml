@@ -1,0 +1,85 @@
+# main.yaml
+
+AWSTemplateFormatVersion: 2010-09-09
+Transform: AWS::Serverless-2016-10-31
+Description: >
+  This template defines the resources for the API Gateway infrastructure.
+
+Parameters:
+  Environment:
+    Type: String
+    Default: dev
+    AllowedValues:
+      - dev
+      - prod
+    Description: The environment to deploy the resources to
+  ProjectName:
+    Type: String
+    Description: The name of the project
+    Default: km-test
+  S3BUCKET:
+    Type: String
+    Description: The name of the S3 bucket
+    Default: km-test-bucket
+  FoundationModel: 
+    Type: String
+    Default: "anthropic.claude-3-haiku-20240307-v1:0"
+
+Resources:
+  LambdaFunction:
+    Type: AWS::Serverless::Application
+    Properties:
+      Location: ./lambda.yaml
+      Parameters:
+        Environment: !Ref Environment
+        ProjectName: !Ref ProjectName
+        S3BUCKET: !Ref S3BUCKET
+
+#   BedrockAgent:
+#     Type: AWS::Serverless::Application
+#     Properties:
+#       Location: ./bedrock.yaml
+#       Parameters:
+#         Environment: !Ref Environment
+#         ProjectName: !Ref ProjectName
+#         InternetSearchFunctionArn: !GetAtt LambdaFunction.Outputs.InternetSearchFunctionArn
+#         WebscraperFunctionArn: !GetAtt LambdaFunction.Outputs.WebscraperFunctionArn
+#         S3BUCKET: !Ref S3BUCKET
+#         FoundationModel: !Ref FoundationModel
+#         BedrockAgentRoleArn: !GetAtt BedrockAgentRole.Arn
+
+#   BedrockAgentRole:
+#     Type: AWS::IAM::Role
+#     Properties:
+#       # The role must have the prefix of `AmazonBedrockExecutionRoleForAgents_`
+#       RoleName: !Sub AmazonBedrockExecutionRoleForAgents_${ProjectName}-${Environment}
+#       AssumeRolePolicyDocument:
+#         Version: 2012-10-17
+#         Statement:
+#           - Effect: Allow
+#             Principal:
+#               Service:
+#                 - bedrock.amazonaws.com
+#             Action:
+#               - sts:AssumeRole
+#       Policies:
+#         - PolicyName: !Sub ${ProjectName}-${Environment}-BedrockAgentPolicy
+#           PolicyDocument:
+#             Version: 2012-10-17
+#             Statement:
+#               - Effect: Allow
+#                 Action:
+#                   - lambda:InvokeFunction
+#                 Resource:
+#                   - !GetAtt LambdaFunction.Outputs.InternetSearchFunctionArn
+#                   - !GetAtt LambdaFunction.Outputs.WebscraperFunctionArn
+#               - Effect: Allow
+#                 Action:
+#                   - bedrock:InvokeModel
+#                 Resource: 
+#                   !Sub "arn:aws:bedrock:${AWS::Region}::foundation-model/${FoundationModel}"
+
+# Outputs:
+#   BedrockAgent:
+#     Description: Bedrock Agent ARN
+#     Value: !GetAtt BedrockAgent.Outputs.BedrockAgent

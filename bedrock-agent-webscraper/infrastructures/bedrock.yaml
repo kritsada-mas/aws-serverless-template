@@ -1,0 +1,53 @@
+AWSTemplateFormatVersion: 2010-09-09
+Transform: AWS::Serverless-2016-10-31
+
+Parameters:
+  Environment:
+    Type: String
+  ProjectName:
+    Type: String
+  InternetSearchFunctionArn:
+    Type: String
+  WebscraperFunctionArn:
+    Type: String
+  S3BUCKET:
+    Type: String
+  FoundationModel: 
+    Type: String
+  BedrockAgentRoleArn:
+    Type: String
+
+Resources:
+  BedrockAgent:
+    Type: AWS::Bedrock::Agent
+    Properties:
+      AgentName: !Sub ${ProjectName}-${Environment}-BedrockAgent
+      AgentResourceRoleArn: !Ref BedrockAgentRoleArn
+      FoundationModel: !Ref FoundationModel
+      Instruction: >
+        You are a research analyst that webscrapes websites,
+        and searches the internet to provide information based on a {question}.
+        You provide concise answers in a friendly manner.
+      ActionGroups:
+        - ActionGroupName: "InternetSearchAction"
+          ActionGroupExecutor:
+            Lambda: !Ref InternetSearchFunctionArn
+          ApiSchema:
+            S3:
+              S3BucketName: !Ref S3BUCKET
+              S3ObjectKey: schemas/internet-search-schema.json
+        - ActionGroupName: "WebscraperAction"
+          ActionGroupExecutor:
+            Lambda: !Ref WebscraperFunctionArn
+          ApiSchema:
+            S3:
+              S3BucketName: !Ref S3BUCKET
+              S3ObjectKey: schemas/webscraper-schema.json
+
+  
+                  
+
+Outputs:
+  BedrockAgent:
+    Description: Bedrock Agent ARN
+    Value: !Ref BedrockAgent
